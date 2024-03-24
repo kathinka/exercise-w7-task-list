@@ -1,55 +1,61 @@
-const TaskList = ({ loading, taskList }) => {
-  if (loading) {
-    return <h1>Loading in progress...</h1>
-  }
+import { formatDistance } from 'date-fns';
 
-  const onTaskCheckChange = (task) => {
-    // Make a POST request here with the updated task isChecked value
 
-    /* 
-    update a state object
-    
-    updatedTask is a new object that is the same as the task object except for the isChecked property, 
-    which is toggled from true to false or from false to true. 
-    This code is often used to update a property of an object while preserving the rest of its properties. */
+export const TaskList = ({ loading, taskList, setTaskList }) => {
+	if (loading) {
+		return <h1>Loading in progress...</h1>
+	} else if (taskList.length === 0) {
+		return <h1>No tasks available</h1>
+	}
 
-    /*     pass the updatedTask to the headers of your POST request
+	const onTaskCheckChange = (task) => {
+		const updatedTask = { ...task, isChecked: !task.isChecked }
+		const APITASKS = `https://week-7-backend.onrender.com/tasks/${task._id}/check`
+		const checkedList = {
+			method: "POST",
+			headers: { updatedTask, "Content-Type": "application/json" },
+			// send the new task as a JSON string
+			body: JSON.stringify({
+				isChecked: updatedTask.isChecked,
+			}
+			),
+		}
 
-    headers: { updatedTask, "Content-Type": "application/json" }
-    */
+		fetch(APITASKS, checkedList)
+			.then((response) => response.json())
+			.catch((error) => {
+				console.error(error)
+			})
+		setTaskList((taskList) =>
+			taskList.map((singleTask) =>
+				singleTask._id === task._id ? updatedTask : singleTask
+			)
+		)
+	}
 
-    const updatedTask = { ...task, isChecked: !task.isChecked }
-
-    /*    Update the task list in the state
-    Use .map to update the specific task if found, otherwise return it unchanged
-
-    setTaskList() 
-    */
-  }
-
-  return (
-    <section className="tasks">
-      {taskList
-        .map((task) => (
-          <div key={task._id} className="task">
-            <input
-              onChange={()=> {}}
-              type="checkbox"
-              checked={task.isChecked}
-            />
-            <h4>{task.description}</h4>
-
-          {/* format the date */}
-            <p>{task.date}</p>
-          </div>
-        ))
-        /* reverse the list to show the newest tasks at the top
-        
-        show only the latest 10 tasks
-        */
-        }
-    </section>
-  )
+	return (
+		<section className="tasks">
+			{taskList.map((task) => (
+				<div key={task._id} className="task">
+					<input
+						onChange={() => onTaskCheckChange(task)}
+						type="checkbox"
+						checked={task.isChecked}
+					/>
+					<h4>{task.description}</h4>
+					<p>{formatDistance(new Date(task.date), new Date(), {
+						addSuffix: true,
+					})}
+					</p>
+				</div>
+			))
+			// reverse the list to show the last task first
+			.reverse()
+				// slice the taskList to show only the last 10 tasks
+			.slice(0, 10)
+			}
+		</section>
+	);
 }
 
-export default TaskList
+

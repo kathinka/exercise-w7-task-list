@@ -1,4 +1,4 @@
-const TaskForm = ({ newTodo, onNewTodoChange, onFormSubmit }) => {
+export const TaskForm = ({ newTodo, onNewTodoChange, onFormSubmit }) => {
   return (
     <form onSubmit={onFormSubmit}>
       <h1>📝 ToDo App</h1>
@@ -14,4 +14,3 @@ const TaskForm = ({ newTodo, onNewTodoChange, onFormSubmit }) => {
   )
 }
 
-export default TaskForm
